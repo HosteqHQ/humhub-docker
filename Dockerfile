@@ -95,7 +95,7 @@ RUN apk add --no-cache \
     php7-exif \
     php7-fileinfo \
     php7-session \
-    supervisor \
+    runit \
     nginx \
     sqlite \
     && rm -rf /var/cache/apk/*
@@ -114,9 +114,9 @@ ENV PHP_MAX_EXECUTION_TIME=60
 ENV PHP_MEMORY_LIMIT=1G
 ENV PHP_TIMEZONE=UTC
 
-RUN chown -R nginx:nginx /var/lib/nginx/ && \
-    touch /var/run/supervisor.sock && \
-    chmod 777 /var/run/supervisor.sock
+ENV SVDIR=/etc/service
+
+RUN chown -R nginx:nginx /var/lib/nginx/
 
 COPY --from=builder --chown=nginx:nginx /usr/src/humhub /var/www/localhost/htdocs/
 COPY --chown=nginx:nginx humhub/ /var/www/localhost/htdocs/
@@ -127,10 +127,9 @@ RUN mkdir -p /usr/src/humhub/protected/config/ && \
     echo "v${HUMHUB_VERSION}" >  /usr/src/humhub/.version
 
 COPY etc/ /etc/
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY sbin/ /sbin/
 
-RUN chmod 600 /etc/crontabs/nginx && \
-    chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN chmod 600 /etc/crontabs/nginx
 
 VOLUME /var/www/localhost/htdocs/uploads
 VOLUME /var/www/localhost/htdocs/protected/config
@@ -138,5 +137,5 @@ VOLUME /var/www/localhost/htdocs/protected/modules
 
 EXPOSE 80
 
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["supervisord", "-n", "-c", "/etc/supervisord.conf"]
+STOPSIGNAL SIGINT
+ENTRYPOINT [ "runit-init" ]

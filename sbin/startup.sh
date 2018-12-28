@@ -52,6 +52,9 @@ HUMHUB_MAILER_ALLOW_SELF_SIGNED_CERTS=${HUMHUB_MAILER_ALLOW_SELF_SIGNED_CERTS:-0
 export NGINX_CLIENT_MAX_BODY_SIZE=${NGINX_CLIENT_MAX_BODY_SIZE:-10m}
 export NGINX_KEEPALIVE_TIMEOUT=${NGINX_KEEPALIVE_TIMEOUT:-65}
 
+# runsvdir drops the environment so we have to store enviroment variables
+export | grep PHP >/etc/envvars_php
+
 wait_for_db() {
 	if [ "$WAIT_FOR_DB" = "false" ]; then
 		return 0

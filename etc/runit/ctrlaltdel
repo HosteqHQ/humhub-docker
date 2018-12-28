@@ -1,0 +1,11 @@
+#!/bin/sh
+
+echo "shutting down container"
+
+# first shutdown any service started by runit
+for _srv in /etc/service/*; do
+  sv force-stop "$_srv"
+done
+
+runit-init 0
+exit 0
